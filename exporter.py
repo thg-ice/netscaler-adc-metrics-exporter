@@ -250,7 +250,7 @@ class CitrixAdcCollector(object):
     INVALID = 'INVALID'
 
     def __init__(self, nsip, metrics, username, password, protocol,
-                 nitro_timeout, k8s_cic_prefix, ns_cert):
+                 nitro_timeout, k8s_cic_prefix, ns_cert, vlb_prefix_filter,vcs_prefix_filter):
         self.nsip = nsip
         self.metrics = metrics
         self.username = username
@@ -262,6 +262,8 @@ class CitrixAdcCollector(object):
         self.ns_session = None
         self.stats_access_pending = False
         self.ns_session_pending = False
+        self.vlb_prefix_filter = vlb_prefix_filter
+        self.vcs_prefix_filter = vcs_prefix_filter
 
     # Collect metrics from Citrix ADC
     def collect(self):
@@ -348,6 +350,10 @@ class CitrixAdcCollector(object):
                         label_values.append(self.nsip)
                     else:
                         label_values = [self.nsip]
+                    if entity_name == "lbvserver" and self.skip_metric(label_values, self.vlb_prefix_filter):
+                        continue
+                    if entity_name == "csvserver" and self.skip_metric(label_values, self.vcs_prefix_filter):
+                        continue
                     try:
                         c.add_metric(label_values, float(
                             data_item[ns_metric_name]))
@@ -387,6 +393,10 @@ class CitrixAdcCollector(object):
                         label_values.append(self.nsip)
                     else:
                         label_values = [self.nsip]
+                    if entity_name == "lbvserver" and self.skip_metric(label_values, self.vlb_prefix_filter):
+                        continue
+                    if entity_name == "csvserver" and self.skip_metric(label_values, self.vcs_prefix_filter):
+                        continue
                     try:
                         g.add_metric(label_values, float(
                             data_item[ns_metric_name]))
@@ -397,6 +407,12 @@ class CitrixAdcCollector(object):
         self.stats_access_pending = False
         yield self.populate_probe_status(status)
 
+    def skip_metric(self, label_values, prefix):
+        if prefix:
+            if not label_values[0].startswith(prefix):
+                return True
+        return False
+        
     # Function to fire nitro commands and collect data from NS
     def collect_data(self, entity):
         '''Fetches stats from ADC using nitro call for different entity types.'''
@@ -725,6 +741,8 @@ def main():
     parser.add_argument('--config-file', required=False, type=str)
     parser.add_argument('--k8sCICprefix', required=False, default='k8s',
                         type=str, help='Prefix for CIC configured k8s entities')
+    parser.add_argument('--vlb-prefix-filter', required=False, type=str, default="", help="provide prefix filter for vlb")
+    parser.add_argument('--vcs-prefix-filter', required=False, type=str, default="", help="provide prefix filter for vcs")
 
     # parse arguments provided
     args = parser.parse_args()
@@ -768,7 +786,9 @@ def main():
     try:
         REGISTRY.register(CitrixAdcCollector(nsip=args.target_nsip, metrics=metrics_json, username=ns_user,
                                              password=ns_password, protocol=ns_protocol,
-                                             nitro_timeout=args.timeout, k8s_cic_prefix=args.k8sCICprefix,                                                          ns_cert=ns_cert))
+                                             nitro_timeout=args.timeout, k8s_cic_prefix=args.k8sCICprefix,
+                                             ns_cert=ns_cert, vlb_prefix_filter=args.vlb_prefix_filter, 
+                                             vcs_prefix_filter=args.vcs_prefix_filter))
     except Exception as e:
         logger.error('Invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
 
