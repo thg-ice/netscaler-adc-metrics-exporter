@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: netscaler-exporter
+    prometheus: prometheus
+  name: netscaler-exporter-be
+  namespace: monitoring
+spec:
+  endpoints:
+  - interval: 1m
+    port: http
+  namespaceSelector:
+    matchNames:
+    - kube-system
+  selector:
+    matchLabels:
+      app: netscaler-exporter-be

@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: netscaler-exporter
+  name: netscaler-exporter-be
   namespace: kube-system
   labels:
-    app: netscaler-exporter
+    app: netscaler-exporter-be
 spec:
   containers:
-    - name: netscaler-exporter
+    - name: netscaler-exporter-be
       image: ghcr.io/thg-ice/netscaler-exporter:v0.0.4 
       args:
         - "--target-nsip=10.10.127.126"
@@ -30,10 +30,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: netscaler-exporter
+  name: netscaler-exporter-be
   namespace: kube-system
   labels:
-    app: netscaler-exporter
+    app: netscaler-exporter-be
 spec:
   type: ClusterIP
   ports:
@@ -41,18 +41,46 @@ spec:
     targetPort: 8888
     name: exporter-port
   selector:
-    app: netscaler-exporter
+    app: netscaler-exporter-be
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: netscaler-exporter
-  namespace: kube-system
   labels:
-    app: netscaler-exporter
+    app: netscaler-exporter-be
+    prometheus: prometheus
+  name: netscaler-exporter-be
+  namespace: monitoring
 spec:
+  endpoints:
+  - interval: 1m
+    port: http
+  namespaceSelector:
+    matchNames:
+    - kube-system
   selector:
     matchLabels:
-      app: netscaler-exporter
-  endpoints:
-  - port: exporter-port
+      app: netscaler-exporter-be
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-prometheus-to-netscaler-exporter
+  namespace: monitoring
+specs:
+- endpointSelector:
+    matchLabels: 
+      app: netscaler-exporter-be
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: monitoring
+        prometheus: prometheus-agent
+    toPorts:
+    - ports:
+      - port: "8888"
+        protocol: TCP
+      rules:
+        http:
+        - method: GET
+          path: /metrics
