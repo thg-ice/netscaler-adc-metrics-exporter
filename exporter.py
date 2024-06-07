@@ -252,6 +252,8 @@ class CitrixAdcCollector(object):
 
     def __init__(self, nsip, metrics, username, password, protocol,
                  nitro_timeout, k8s_cic_prefix, ns_cert, vlb_prefix_filter,vcs_prefix_filter):
+        logger.debug('vlb_prefix_filter {}'.format(vlb_prefix_filter))
+        logger.debug('vcs_prefix_filter {}'.format(vcs_prefix_filter))
         self.nsip = nsip
         self.metrics = metrics
         self.username = username

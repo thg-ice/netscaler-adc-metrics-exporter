@@ -8,12 +8,13 @@ metadata:
 spec:
   containers:
     - name: netscaler-exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.9
+      image: ghcr.io/thg-ice/netscaler-exporter:v0.0.3 
       args:
         - "--target-nsip=10.10.127.126"
         - "--port=8888"
         - "--metric=lbvserver"
         - "--log-level=DEBUG"
+        - "--vlb-prefix-filter='autoice.{5}-(prod|nonprod)'"
       imagePullPolicy: Always
       volumeMounts:
       - name: nslogin
