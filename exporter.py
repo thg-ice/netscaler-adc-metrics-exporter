@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import re
 import yaml
 import json
 import time
@@ -407,11 +408,12 @@ class CitrixAdcCollector(object):
         self.stats_access_pending = False
         yield self.populate_probe_status(status)
 
-    def skip_metric(self, label_values, prefix):
-        if prefix:
-            if not label_values[0].startswith(prefix):
-                return True
-        return False
+    def skip_metric(self, label_values, filter):
+        if filter:
+            match = re.match(filter, label_values[0])
+            if match:
+                return False
+        return True
         
     # Function to fire nitro commands and collect data from NS
     def collect_data(self, entity):
