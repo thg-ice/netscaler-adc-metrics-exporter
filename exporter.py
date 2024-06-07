@@ -353,10 +353,9 @@ class CitrixAdcCollector(object):
                         label_values.append(self.nsip)
                     else:
                         label_values = [self.nsip]
-                    if entity_name == "lbvserver" and self.skip_metric(label_values, self.vlb_prefix_filter):
-                        continue
-                    if entity_name == "csvserver" and self.skip_metric(label_values, self.vcs_prefix_filter):
-                        continue
+
+                    if self.skip_metric(entity_name, data_item): continue
+                    
                     try:
                         c.add_metric(label_values, float(
                             data_item[ns_metric_name]))
@@ -396,10 +395,9 @@ class CitrixAdcCollector(object):
                         label_values.append(self.nsip)
                     else:
                         label_values = [self.nsip]
-                    if entity_name == "lbvserver" and self.skip_metric(label_values, self.vlb_prefix_filter):
-                        continue
-                    if entity_name == "csvserver" and self.skip_metric(label_values, self.vcs_prefix_filter):
-                        continue
+
+                    if self.skip_metric(entity_name, data_item): continue
+
                     try:
                         g.add_metric(label_values, float(
                             data_item[ns_metric_name]))
@@ -410,12 +408,12 @@ class CitrixAdcCollector(object):
         self.stats_access_pending = False
         yield self.populate_probe_status(status)
 
-    def skip_metric(self, label_values, filter):
-        if filter:
-            match = re.match(filter, label_values[0])
-            if match:
-                return False
-        return True
+    def skip_metric(self, entity_name, data_item):
+        if entity_name == 'lbvserver' and self.vlb_prefix_filter:
+            return re.match(self.vlb_prefix_filter, data_item['name']) is None
+        if entity_name == 'csvserver' and self.vcs_prefix_filter:
+            return re.match(self.vcs_prefix_filter, data_item['name']) is None
+        return False
         
     # Function to fire nitro commands and collect data from NS
     def collect_data(self, entity):
