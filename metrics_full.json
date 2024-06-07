@@ -352,8 +352,8 @@
         ],
 
         "labels": [
-            ["type", "citrixadc_lb_type"],
             ["name", "citrixadc_lb_name"],
+            ["type", "citrixadc_lb_type"],
             ["state", "citrixadc_lb_state"]
         ]
     },
