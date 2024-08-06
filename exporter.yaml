@@ -8,7 +8,7 @@ metadata:
 spec:
   containers:
     - name: netscaler-exporter-be
-      image: ghcr.io/thg-ice/netscaler-exporter:v0.0.5
+      image: ghcr.io/thg-ice/netscaler-exporter:v0.0.6
       args:
         - "--target-nsip=10.10.127.126"
         - "--port=8888"
