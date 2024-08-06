@@ -4,7 +4,7 @@ RUN apk add python3
 RUN apk add py3-pip
 RUN apk add curl iputils
 COPY pip_requirements.txt .
-RUN pip3 install -r pip_requirements.txt
+RUN pip3 install --break-system-packages -r pip_requirements.txt
 COPY version/VERSION /exporter/
 COPY exporter.py /exporter/
 COPY metrics.json /exporter/
