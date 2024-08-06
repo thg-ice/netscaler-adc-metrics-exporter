@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:3.20.2
 RUN apk update
 RUN apk add python3
 RUN apk add curl iputils
