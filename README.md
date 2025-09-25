@@ -43,11 +43,11 @@ pip3 install -r pip_requirements.txt
 Contents of requirements.txt
 
 ```
-prometheus-client==0.8.0
-requests==2.23.0
-PyYAML==5.3.1
-tenacity==6.2.0
-urllib3==1.25.9
+prometheus-client==0.20.0
+requests==2.32.4
+PyYAML==6.0.1
+tenacity==9.0.0
+urllib3==2.5.0
 ```
 
 Now, create a folder ```/exporter``` and copy the ```metrics.json``` file to the folder. 
