@@ -12,7 +12,6 @@ import sys
 from prometheus_client import start_http_server
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, REGISTRY
 from urllib3.exceptions import InsecureRequestWarning
-from urllib3.exceptions import SubjectAltNameWarning
 from requests.auth import HTTPBasicAuth
 from tenacity import retry, RetryError, retry_if_exception_type
 from tenacity import stop_after_attempt, wait_fixed, retry_if_result
@@ -774,7 +773,7 @@ def main():
     ns_cert = get_cert_validation_args(args, ns_protocol)
 
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-    requests.packages.urllib3.disable_warnings(SubjectAltNameWarning)
+    # SubjectAltNameWarning was removed in urllib3 v2.0+
 
     # Start the server to expose the metrics.
     start_exporter_server(args.port)
